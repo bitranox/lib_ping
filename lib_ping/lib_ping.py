@@ -8,7 +8,7 @@ import lib_detect_encoding
 
 
 class ResponseObject(object):
-    def __init__(self):
+    def __init__(self) -> None:
         # init values for not reached condition
         self.target = ''
         self.reached: bool = False
@@ -17,6 +17,7 @@ class ResponseObject(object):
         self.time_min_ms: float = -1
         self.time_avg_ms: float = -1
         self.time_max_ms: float = -1
+        self.n_packets_lost: int = 0
         self.packets_lost_percentage: int = 100
         self.str_result = ''
 
@@ -25,7 +26,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     """
 
     >>> ping('www.google.com')  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    <lib_ping.ResponseObject object at ...>
+    <...ResponseObject object at ...>
 
     >>> response = ping('1.1.1.1', 1)
     >>> response.reached
@@ -88,7 +89,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     if not lost:
         lost = re.findall(r'\d+(?=%)', text)
 
-    response.n_packets_lost = lost
+    response.n_packets_lost = len(lost)
     response.packets_lost_percentage = int(round(float(lost[len(lost) - 1]))) if lost else 100
     if response.packets_lost_percentage < 100:
         response.reached = True
@@ -96,6 +97,8 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     return response
 
 
-def _create_str_result(response: ResponseObject):
+def _create_str_result(response: ResponseObject) -> str:
     response.str_result = format('[{ip}] pinged {n_times} times, min: {t_min:.2f}ms, avg: {t_avg:.2f}ms, max: {t_min:.2f}ms, {ppc:.0f}% Packet loss'.format(
-        ip=response.ip, n_times=response.number_of_pings, t_min=response.time_min_ms, t_max=response.time_max_ms, t_avg=response.time_avg_ms, ppc=response.packets_lost_percentage))
+        ip=response.ip, n_times=response.number_of_pings, t_min=response.time_min_ms,
+        t_max=response.time_max_ms, t_avg=response.time_avg_ms, ppc=response.packets_lost_percentage))
+    return response.str_result
