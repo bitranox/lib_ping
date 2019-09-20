@@ -10,16 +10,17 @@ import lib_detect_encoding
 class ResponseObject(object):
     def __init__(self) -> None:
         # init values for not reached condition
-        self.target = ''
-        self.reached: bool = False
-        self.ip: str = '0.0.0.0'
-        self.number_of_pings: int = 0
-        self.time_min_ms: float = -1
-        self.time_avg_ms: float = -1
-        self.time_max_ms: float = -1
-        self.n_packets_lost: int = 0
-        self.packets_lost_percentage: int = 100
-        self.str_result = ''
+        # old typing syntax for python 3.5
+        self.target = ''                        # type: str
+        self.reached = False                    # type: bool
+        self.ip = '0.0.0.0'                     # type: str
+        self.number_of_pings = 0                # type: int
+        self.time_min_ms = -1                   # type: float
+        self.time_avg_ms = -1                   # type: float
+        self.time_max_ms = -1                   # type: float
+        self.n_packets_lost = 0                 # type: int
+        self.packets_lost_percentage = 100      # type: int
+        self.str_result = ''                    # type: str
 
 
 def ping(target: str, times: int = 4) -> ResponseObject:
