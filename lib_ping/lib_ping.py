@@ -47,15 +47,15 @@ def ping(target: str, times: int = 4) -> ResponseObject:
 
     # execute ping command and get stdin thru pipe
     pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
-    if not pipe:
-        if os.name == 'nt':  # win32
-            cmd = 'ping -w 2000 ' + target
-        else:  # unix/linux
-            cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
-        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
-        if not pipe:
-            _create_str_result(response=response)
-            return response
+    if not pipe:                                                                                                     # pragma: no cover
+        if os.name == 'nt':                                                                                          # pragma: no cover
+            cmd = 'ping -w 2000 ' + target                                                                           # pragma: no cover
+        else:                                                                                                        # pragma: no cover
+            cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)                     # pragma: no cover
+        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]    # pragma: no cover
+        if not pipe:                                                                                                 # pragma: no cover
+            _create_str_result(response=response)                                                                    # pragma: no cover
+            return response                                                                                          # pragma: no cover
 
     # replace CR/LF
     encoding = lib_detect_encoding.detect_encoding(pipe)
@@ -71,18 +71,18 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     # avg ping time
     if os.name == 'nt':
         time = re.findall(r'(\d+(?=ms))+', text)
-        if time:
+        if time:                                                                                                     # pragma: no cover
             response.time_avg_ms = float(time[len(time) - 1])
             response.time_max_ms = float(time[len(time) - 2])
             response.time_min_ms = float(time[len(time) - 3])
     else:
         time = re.findall(r'(?=\d+\.\d+/)(\d+\.\d+)+', text)
-        if time:
+        if time:                                                                                                     # pragma: no cover
             response.time_min_ms = float(time[0])
             response.time_avg_ms = float(time[1])
             response.time_max_ms = float(time[2])
-    if not time:
-        response.time_min_ms = response.time_avg_ms = response.time_max_ms = -1
+    if not time:                                                                                                     # pragma: no cover
+        response.time_min_ms = response.time_avg_ms = response.time_max_ms = -1                                      # pragma: no cover
 
     # packet loss rate
     lost = re.findall(r'\d+.\d+(?=%)', text)
@@ -91,7 +91,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
 
     response.n_packets_lost = len(lost)
     response.packets_lost_percentage = int(round(float(lost[len(lost) - 1]))) if lost else 100
-    if response.packets_lost_percentage < 100:
+    if response.packets_lost_percentage < 100:                                                                       # pragma: no cover
         response.reached = True
     _create_str_result(response=response)
     return response
