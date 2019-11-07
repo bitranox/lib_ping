@@ -94,7 +94,7 @@ def _create_str_result(response: ResponseObject) -> str:
 def ping_windows(target: str) -> lib_shell.ShellCommandResponse:
     """
     >>> if lib_platform.is_platform_windows:
-    ...     response = ping_windows(target='1.1.1.1', times=1)
+    ...     response = ping_windows(target='1.1.1.1')
     """
 
     try:
