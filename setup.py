@@ -10,7 +10,8 @@ except ImportError:
     from distutils.core import setup
 
 package_name = 'lib_ping'                                                           # type: str
-required = ['lib_detect_encoding @ git+https://github.com/bitranox/lib_detect_encoding.git',
+required = ['lib_platform @ git+https://github.com/bitranox/lib_platform.git',
+            'lib_shell @ git+https://github.com/bitranox/lib_shell.git'
             ]                                                                       # type: List
 required_for_tests = list()                                                         # type: List
 entry_points = dict()                                                               # type: Dict

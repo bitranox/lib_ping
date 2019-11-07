@@ -11,4 +11,5 @@ pytest-mypy ; platform_python_implementation != "PyPy" and python_version >= "3.
 pytest-runner
 
 ## Project Requirements
-lib_detect_encoding @ git+https://github.com/bitranox/lib_detect_encoding.git
+lib_platform @ git+https://github.com/bitranox/lib_platform.git
+lib_shell @ git+https://github.com/bitranox/lib_shell.git

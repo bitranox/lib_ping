@@ -1,10 +1,10 @@
 # STDLIB
-import os
 import re
 import subprocess
 
 # OWN
-import lib_detect_encoding
+import lib_platform
+import lib_shell
 
 
 class ResponseObject(object):
@@ -37,31 +37,16 @@ def ping(target: str, times: int = 4) -> ResponseObject:
 
     """
 
-    if os.name == 'nt':  # win32
-        cmd = 'ping -w 2000 ' + target
-    else:  # unix/linux
-        cmd = 'ping -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
-
     response = ResponseObject()
     response.target = target
     response.number_of_pings = times
 
-    # execute ping command and get stdin thru pipe
-    pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
-    if not pipe:                                                                                                     # pragma: no cover
-        if os.name == 'nt':                                                                                          # pragma: no cover
-            cmd = 'ping -w 2000 ' + target                                                                           # pragma: no cover
-        else:                                                                                                        # pragma: no cover
-            cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)                     # pragma: no cover
-        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]    # pragma: no cover
-        if not pipe:                                                                                                 # pragma: no cover
-            _create_str_result(response=response)                                                                    # pragma: no cover
-            return response                                                                                          # pragma: no cover
+    if lib_platform.is_platform_posix:
+        ping_result = ping_posix(target=target, times=times)
+    else:
+        ping_result = ping_windows(target=target)
 
-    # replace CR/LF
-    encoding = lib_detect_encoding.detect_encoding(pipe)
-    pipe = pipe.decode(encoding)
-    text = pipe.replace('\r\n', '\n').replace('\r', '\n')
+    text = ping_result.stdout.replace('\r\n', '\n').replace('\r', '\n')
 
     # match IP address in format: [192.168.1.1] (192.168.1.1)
     ip = re.findall(r'(?<=[(\[])\d+\.\d+\.\d+\.\d+(?=[)\]])', text)
@@ -70,18 +55,19 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     response.ip = ip[0] if ip else '0.0.0.0'
 
     # avg ping time
-    if os.name == 'nt':
-        time = re.findall(r'(\d+(?=ms))+', text)
-        if time:                                                                                                     # pragma: no cover
-            response.time_avg_ms = float(time[len(time) - 1])
-            response.time_max_ms = float(time[len(time) - 2])
-            response.time_min_ms = float(time[len(time) - 3])
-    else:
+    if lib_platform.is_platform_posix:
         time = re.findall(r'(?=\d+\.\d+/)(\d+\.\d+)+', text)
         if time:                                                                                                     # pragma: no cover
             response.time_min_ms = float(time[0])
             response.time_avg_ms = float(time[1])
             response.time_max_ms = float(time[2])
+    else:
+        time = re.findall(r'(\d+(?=ms))+', text)
+        if time:                                                                                                     # pragma: no cover
+            response.time_avg_ms = float(time[len(time) - 1])
+            response.time_max_ms = float(time[len(time) - 2])
+            response.time_min_ms = float(time[len(time) - 3])
+
     if not time:                                                                                                     # pragma: no cover
         response.time_min_ms = response.time_avg_ms = response.time_max_ms = -1                                      # pragma: no cover
 
@@ -103,3 +89,56 @@ def _create_str_result(response: ResponseObject) -> str:
         ip=response.ip, n_times=response.number_of_pings, t_min=response.time_min_ms,
         t_max=response.time_max_ms, t_avg=response.time_avg_ms, ppc=response.packets_lost_percentage))
     return response.str_result
+
+
+def ping_windows(target: str) -> lib_shell.ShellCommandResponse:
+    try:
+        response = ping_windows_ipv4(target=target)
+    except subprocess.CalledProcessError:
+        response = ping_windows_ipv6(target=target)
+    return response
+
+
+def ping_windows_ipv4(target: str) -> lib_shell.ShellCommandResponse:
+    cmd = 'ping -w 2000 ' + target
+    response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    return response
+
+
+def ping_windows_ipv6(target: str) -> lib_shell.ShellCommandResponse:
+    cmd = 'ping -w 2000 ' + target
+    response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    return response
+
+
+def ping_posix(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    """
+    >>> response = ping_posix(target='1.1.1.1', times=1)
+    """
+    try:
+        response = ping_posix_ipv4(target=target, times=times)
+    except subprocess.CalledProcessError:
+        response = ping_posix_ipv6(target=target, times=times)
+    return response
+
+
+def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    try:
+        cmd = 'ping -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -c {times} -W2000 -i 0,2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    return response
+
+
+def ping_posix_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    try:
+        cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -6 -c {times} -W2000 -i 0,2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet)
+    return response
