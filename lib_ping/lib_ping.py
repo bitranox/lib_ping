@@ -85,7 +85,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
 
 
 def _create_str_result(response: ResponseObject) -> str:
-    response.str_result = format('[{ip}] pinged {n_times} times, min: {t_min:.2f}ms, avg: {t_avg:.2f}ms, max: {t_min:.2f}ms, {ppc:.0f}% Packet loss'.format(
+    response.str_result = format('[{ip}] pinged {n_times} times, min: {t_min:.2f}ms, avg: {t_avg:.2f}ms, max: {t_max:.2f}ms, {ppc:.0f}% Packet loss'.format(
         ip=response.ip, n_times=response.number_of_pings, t_min=response.time_min_ms,
         t_max=response.time_max_ms, t_avg=response.time_avg_ms, ppc=response.packets_lost_percentage))
     return response.str_result
