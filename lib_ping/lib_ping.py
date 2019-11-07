@@ -92,6 +92,11 @@ def _create_str_result(response: ResponseObject) -> str:
 
 
 def ping_windows(target: str) -> lib_shell.ShellCommandResponse:
+    """
+    >>> if lib_platform.is_platform_windows:
+    ...     response = ping_windows(target='1.1.1.1', times=1)
+    """
+
     try:
         response = ping_windows_ipv4(target=target)
     except subprocess.CalledProcessError:
@@ -113,7 +118,8 @@ def ping_windows_ipv6(target: str) -> lib_shell.ShellCommandResponse:
 
 def ping_posix(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> response = ping_posix(target='1.1.1.1', times=1)
+    >>> if lib_platform.is_platform_posix:
+    ...     response = ping_posix(target='1.1.1.1', times=1)
     """
     try:
         response = ping_posix_ipv4(target=target, times=times)
