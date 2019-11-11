@@ -127,8 +127,6 @@ def ping_posix(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
     >>> if lib_platform.is_platform_posix:
     ...     response = ping_posix(target='1.1.1.1', times=1)
-    >>> if lib_platform.is_platform_posix:
-    ...     response = ping_posix(target='10.0.0.1', times=1)
 
     """
     try:
@@ -142,8 +140,6 @@ def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
     >>> if lib_platform.is_platform_posix:
     ...     response = ping_posix_ipv4(target='1.1.1.1', times=1)
-    >>> if lib_platform.is_platform_posix:
-    ...     response = ping_posix_ipv4(target='10.0.0.1', times=1)
 
     """
     # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
