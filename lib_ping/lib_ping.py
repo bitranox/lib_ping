@@ -30,13 +30,15 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     <...ResponseObject object at ...>
 
     >>> response = ping('1.1.1.1', 1)
-    >>> response.reached
-    True
-    >>> response.packets_lost_percentage
-    0
+    >>> assert response.reached
+    >>> assert response.packets_lost_percentage == 0
+
     >>> response = ping('10.0.0.1', 1)
-    >>> response.reached
-    False
+    >>> assert not response.reached
+
+    >>> response = ping('www.rotek.at', 1)
+    >>> assert response.reached
+
 
     """
 
