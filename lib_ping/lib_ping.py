@@ -140,14 +140,20 @@ def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
     >>> if lib_platform.is_platform_posix:
     ...     response = ping_posix_ipv4(target='1.1.1.1', times=1)
+    ...     assert response.stdout is not None
+
+    >>> if lib_platform.is_platform_posix:
+    ...     response = ping_posix_ipv4(target='1.1.1.1', times=10)
+    ...     assert response.stdout is not None
+
 
     """
     # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
     try:
-        cmd = 'ping -c {times} -W2000 -i 0.2 {target} -w 1'.format(times=times, target=target)
+        cmd = 'ping -c {times} -W2000 -i 0.2 -w 10 {target}'.format(times=times, target=target)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     except subprocess.CalledProcessError:
-        cmd = 'ping -c {times} -W2000 -i 0,2 {target} -w 1'.format(times=times, target=target)
+        cmd = 'ping -c {times} -W2000 -i 0,2 -w 10 {target}'.format(times=times, target=target)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     return response
 
@@ -155,9 +161,9 @@ def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
 def ping_posix_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
     # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
     try:
-        cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target} -w 1'.format(times=times, target=target)
+        cmd = 'ping -6 -c {times} -W2000 -i 0.2 -w 10 {target}'.format(times=times, target=target)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     except subprocess.CalledProcessError:
-        cmd = 'ping -6 -c {times} -W2000 -i 0,2 {target} -w 1'.format(times=times, target=target)
+        cmd = 'ping -6 -c {times} -W2000 -i 0,2 -w 10 {target}'.format(times=times, target=target)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     return response
