@@ -36,7 +36,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     >>> response = ping('10.0.0.1', 1)
     >>> assert not response.reached
 
-    >>> response = ping('www.rotek.at', 1)
+    >>> response = ping('www.google.com', 1)
     >>> assert response.reached
 
 
@@ -151,21 +151,23 @@ def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
     """
     # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    reply_wait_deadline_seconds = int(5 + times * 0.2)
     try:
-        cmd = 'ping -c {times} -W2000 -i 0.2 -w 5 {target}'.format(times=times, target=target)
+        cmd = 'ping -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     except subprocess.CalledProcessError:
-        cmd = 'ping -c {times} -W2000 -i 0,2 -w 5 {target}'.format(times=times, target=target)
+        cmd = 'ping -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     return response
 
 
 def ping_posix_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
     # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    reply_wait_deadline_seconds = int(5 + times * 0.2)
     try:
-        cmd = 'ping -6 -c {times} -W2000 -i 0.2 -w 5 {target}'.format(times=times, target=target)
+        cmd = 'ping -6 -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     except subprocess.CalledProcessError:
-        cmd = 'ping -6 -c {times} -W2000 -i 0,2 -w 5 {target}'.format(times=times, target=target)
+        cmd = 'ping -6 -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
         response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     return response
