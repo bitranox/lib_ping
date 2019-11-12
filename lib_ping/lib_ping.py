@@ -11,9 +11,9 @@ class ResponseObject(object):
     def __init__(self) -> None:
         # init values for not reached condition
         # old typing syntax for python 3.5
-        self.target = ''                        # type: str
+        self.target = ''                        # type: str    # the target (input) - can be IP or Hostname
         self.reached = False                    # type: bool
-        self.ip = '0.0.0.0'                     # type: str
+        self.ip = '0.0.0.0'                     # type: str    # the IP Adress (output) of the Target
         self.number_of_pings = 0                # type: int
         self.time_min_ms = -1                   # type: float
         self.time_avg_ms = -1                   # type: float
