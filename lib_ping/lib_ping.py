@@ -104,7 +104,7 @@ def _create_str_result(response: ResponseObject) -> str:
 
 def ping_linux(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_posix:
+    >>> if lib_platform.is_platform_linux:
     ...     response = ping_linux(target='1.1.1.1', times=1)
 
     """
@@ -117,11 +117,11 @@ def ping_linux(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
 def ping_linux_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_posix:
+    >>> if lib_platform.is_platform_linux:
     ...     response = ping_linux_ipv4(target='1.1.1.1', times=1)
     ...     assert response.stdout is not None
 
-    >>> if lib_platform.is_platform_posix:
+    >>> if lib_platform.is_platform_linux:
     ...     response = ping_linux_ipv4(target='1.1.1.1', times=10)
     ...     assert response.stdout is not None
 
