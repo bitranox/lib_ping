@@ -47,8 +47,10 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     response.number_of_pings = times
 
     try:
-        if lib_platform.is_platform_posix:
-            ping_result = ping_posix(target=target, times=times)
+        if lib_platform.is_platform_linux:
+            ping_result = ping_linux(target=target, times=times)
+        elif lib_platform.is_platform_darwin:
+            ping_result = ping_darwin(target=target, times=times)
         else:
             ping_result = ping_windows(target=target)
 
@@ -100,6 +102,99 @@ def _create_str_result(response: ResponseObject) -> str:
     return response.str_result
 
 
+def ping_linux(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    """
+    >>> if lib_platform.is_platform_posix:
+    ...     response = ping_linux(target='1.1.1.1', times=1)
+
+    """
+    try:
+        response = ping_linux_ipv4(target=target, times=times)
+    except subprocess.CalledProcessError:
+        response = ping_linux_ipv6(target=target, times=times)
+    return response
+
+
+def ping_linux_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    """
+    >>> if lib_platform.is_platform_posix:
+    ...     response = ping_linux_ipv4(target='1.1.1.1', times=1)
+    ...     assert response.stdout is not None
+
+    >>> if lib_platform.is_platform_posix:
+    ...     response = ping_linux_ipv4(target='1.1.1.1', times=10)
+    ...     assert response.stdout is not None
+
+
+    """
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    reply_wait_deadline_seconds = int(5 + times * 0.2)
+    try:
+        cmd = 'ping -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    return response
+
+
+def ping_linux_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    reply_wait_deadline_seconds = int(5 + times * 0.2)
+    try:
+        cmd = 'ping -6 -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -6 -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    return response
+
+
+def ping_darwin(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    """
+    >>> if lib_platform.is_platform_darwin:
+    ...     response = ping_darwin(target='1.1.1.1', times=1)
+
+    """
+    try:
+        response = ping_darwin_ipv4(target=target, times=times)
+    except subprocess.CalledProcessError:
+        response = ping_darwin_ipv6(target=target, times=times)
+    return response
+
+
+def ping_darwin_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    """
+    >>> if lib_platform.is_platform_darwin:
+    ...     response = ping_darwin_ipv4(target='1.1.1.1', times=1)
+    ...     assert response.stdout is not None
+
+    >>> if lib_platform.is_platform_darwin:
+    ...     response = ping_darwin_ipv4(target='1.1.1.1', times=10)
+    ...     assert response.stdout is not None
+
+    """
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    try:
+        cmd = 'ping -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -c {times} -W2000 -i 0,2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    return response
+
+
+def ping_darwin_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
+    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
+    try:
+        cmd = 'ping -6 -c {times} -W2000 -i 0.2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    except subprocess.CalledProcessError:
+        cmd = 'ping -6 -c {times} -W2000 -i 0,2 {target}'.format(times=times, target=target)
+        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
+    return response
+
+
 def ping_windows(target: str) -> lib_shell.ShellCommandResponse:
     """
     >>> if lib_platform.is_platform_windows:
@@ -122,52 +217,4 @@ def ping_windows_ipv4(target: str) -> lib_shell.ShellCommandResponse:
 def ping_windows_ipv6(target: str) -> lib_shell.ShellCommandResponse:
     cmd = 'ping -w 2000 ' + target
     response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
-    return response
-
-
-def ping_posix(target: str, times: int) -> lib_shell.ShellCommandResponse:
-    """
-    >>> if lib_platform.is_platform_posix:
-    ...     response = ping_posix(target='1.1.1.1', times=1)
-
-    """
-    try:
-        response = ping_posix_ipv4(target=target, times=times)
-    except subprocess.CalledProcessError:
-        response = ping_posix_ipv6(target=target, times=times)
-    return response
-
-
-def ping_posix_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
-    """
-    >>> if lib_platform.is_platform_posix:
-    ...     response = ping_posix_ipv4(target='1.1.1.1', times=1)
-    ...     assert response.stdout is not None
-
-    >>> if lib_platform.is_platform_posix:
-    ...     response = ping_posix_ipv4(target='1.1.1.1', times=10)
-    ...     assert response.stdout is not None
-
-
-    """
-    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
-    reply_wait_deadline_seconds = int(5 + times * 0.2)
-    try:
-        cmd = 'ping -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
-        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
-    except subprocess.CalledProcessError:
-        cmd = 'ping -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
-        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
-    return response
-
-
-def ping_posix_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
-    # ping -i parameter decimal sign can be different (0.2 or 0,2) on different linux versions
-    reply_wait_deadline_seconds = int(5 + times * 0.2)
-    try:
-        cmd = 'ping -6 -c {times} -W2000 -i 0.2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
-        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
-    except subprocess.CalledProcessError:
-        cmd = 'ping -6 -c {times} -W2000 -i 0,2 -w {deadline} {target}'.format(times=times, target=target, deadline=reply_wait_deadline_seconds)
-        response = lib_shell.run_shell_command(command=cmd, shell=True, log_settings=lib_shell.conf_lib_shell.log_settings_qquiet, retries=1)
     return response
