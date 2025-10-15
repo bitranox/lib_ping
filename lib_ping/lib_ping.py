@@ -47,9 +47,9 @@ def ping(target: str, times: int = 4) -> ResponseObject:
     response.number_of_pings = times
 
     try:
-        if lib_platform.is_platform_linux:
+        if lib_platform.get_is_platform_linux():
             ping_result = ping_linux(target=target, times=times)
-        elif lib_platform.is_platform_darwin:
+        elif lib_platform.get_is_platform_darwin():
             ping_result = ping_darwin(target=target, times=times)
         else:
             ping_result = ping_windows(target=target)
@@ -63,7 +63,7 @@ def ping(target: str, times: int = 4) -> ResponseObject:
         response.ip = ip[0] if ip else '0.0.0.0'
 
         # avg ping time
-        if lib_platform.is_platform_posix:
+        if lib_platform.get_is_platform_posix():
             time = re.findall(r'(?=\d+\.\d+/)(\d+\.\d+)+', text)
             if time:                                                                                                     # pragma: no cover
                 response.time_min_ms = float(time[0])
@@ -104,7 +104,7 @@ def _create_str_result(response: ResponseObject) -> str:
 
 def ping_linux(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_linux:
+    >>> if lib_platform.get_is_platform_linux():
     ...     response = ping_linux(target='1.1.1.1', times=1)
 
     """
@@ -117,11 +117,11 @@ def ping_linux(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
 def ping_linux_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_linux:
+    >>> if lib_platform.get_is_platform_linux():
     ...     response = ping_linux_ipv4(target='1.1.1.1', times=1)
     ...     assert response.stdout is not None
 
-    >>> if lib_platform.is_platform_linux:
+    >>> if lib_platform.get_is_platform_linux():
     ...     response = ping_linux_ipv4(target='1.1.1.1', times=10)
     ...     assert response.stdout is not None
 
@@ -152,7 +152,7 @@ def ping_linux_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
 def ping_darwin(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_darwin:
+    >>> if lib_platform.get_is_platform_darwin():
     ...     response = ping_darwin(target='1.1.1.1', times=1)
 
     """
@@ -165,11 +165,11 @@ def ping_darwin(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
 def ping_darwin_ipv4(target: str, times: int) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_darwin:
+    >>> if lib_platform.get_is_platform_darwin():
     ...     response = ping_darwin_ipv4(target='1.1.1.1', times=1)
     ...     assert response.stdout is not None
 
-    >>> if lib_platform.is_platform_darwin:
+    >>> if lib_platform.get_is_platform_darwin():
     ...     response = ping_darwin_ipv4(target='1.1.1.1', times=10)
     ...     assert response.stdout is not None
 
@@ -197,7 +197,7 @@ def ping_darwin_ipv6(target: str, times: int) -> lib_shell.ShellCommandResponse:
 
 def ping_windows(target: str) -> lib_shell.ShellCommandResponse:
     """
-    >>> if lib_platform.is_platform_windows:
+    >>> if lib_platform.get_is_platform_windows():
     ...     response = ping_windows(target='1.1.1.1')
     """
 
