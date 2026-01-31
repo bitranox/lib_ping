@@ -13,3 +13,4 @@ pytest-runner
 ## Project Requirements
 lib_platform @ git+https://github.com/bitranox/lib_platform.git
 lib_shell @ git+https://github.com/bitranox/lib_shell.git
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
